@@ -1,4 +1,4 @@
-"""Optional Azure OpenAI LLM integration for additional diagnostics."""
+"""Azure OpenAI LLM integration for mandatory post-check diagnostics."""
 
 from __future__ import annotations
 
@@ -83,20 +83,16 @@ def _build_prompt(ir: CanonicalProblemIR, report: VerificationReport) -> str:
 def enrich_report_with_llm(
     report: VerificationReport,
     ir: CanonicalProblemIR,
-    enabled: bool,
     settings: Optional[AzureOpenAISettings] = None,
     requester: Optional[Callable[[AzureOpenAISettings, Dict[str, Any]], Dict[str, Any]]] = None,
 ) -> VerificationReport:
-    """Optionally append Azure OpenAI diagnostic notes into the report."""
-    if not enabled:
-        return report
-
+    """Append Azure OpenAI diagnostic notes into the report (mandatory path)."""
     resolved_settings = settings or AzureOpenAISettings.from_env()
     if resolved_settings is None:
-        report.diagnostics.append(
-            "LLM diagnostics skipped: missing AZURE_OPENAI_API_KEY/AZURE_OPENAI_ENDPOINT/AZURE_OPENAI_DEPLOYMENT."
+        raise RuntimeError(
+            "Missing Azure OpenAI configuration: AZURE_OPENAI_API_KEY, AZURE_OPENAI_ENDPOINT, "
+            "AZURE_OPENAI_DEPLOYMENT are required."
         )
-        return report
 
     call = requester or _default_requester
     payload = {
@@ -124,8 +120,8 @@ def enrich_report_with_llm(
         if content:
             report.diagnostics.append(f"LLM(AzureOpenAI) audit note: {content}")
         else:
-            report.diagnostics.append("LLM diagnostics requested but Azure response contained no content.")
+            raise RuntimeError("Azure OpenAI returned empty content for mandatory LLM diagnostics.")
     except Exception as exc:
-        report.diagnostics.append(f"LLM diagnostics failed (Azure OpenAI): {exc}")
+        raise RuntimeError(f"Mandatory LLM diagnostics failed (Azure OpenAI): {exc}") from exc
 
     return report

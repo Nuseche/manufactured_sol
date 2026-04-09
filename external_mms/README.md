@@ -61,17 +61,7 @@ python -m pip install -e .[dev]
 
 ## Ejecutar CLI
 
-```bash
-cd external_mms
-python -m mms_agent.cli \
-  --input examples/approved_scientist.json \
-  --mode strict_preservation \
-  --output examples/report.json
-```
-
-### Diagnóstico LLM opcional (Azure OpenAI)
-
-Si quieres anexar una nota diagnóstica adicional (post-check) con un agente LLM:
+La ejecución requiere agente LLM vía Azure OpenAI como parte del flujo principal.
 
 ```bash
 export AZURE_OPENAI_API_KEY="..."
@@ -84,11 +74,10 @@ export AZURE_OPENAI_DEPLOYMENT="<deployment-name>"
 python -m mms_agent.cli \
   --input examples/approved_scientist.json \
   --mode strict_preservation \
-  --output examples/report.json \
-  --enable-llm-diagnostics
+  --output examples/report.json
 ```
 
-Si faltan variables, el sistema no falla: deja trazado en `diagnostics` que el paso LLM fue omitido.
+Si faltan variables o falla la llamada a Azure OpenAI, el reporte final se devuelve con `status=parse_error` y diagnóstico explícito.
 
 ## Ejecutar tests
 
