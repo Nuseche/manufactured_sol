@@ -1,0 +1,90 @@
+{
+  "approved": true,
+  "source": "scientist",
+  "problem_id": "cook_hyperelastic_plane_strain_psi1_v1",
+  "mode": "strict_preservation",
+  "problem_statement": "Find the static plane-strain displacement field u: Omega -> R^2 of a compressible finite-strain hyperelastic Cook membrane with strain-energy density psi_1, clamped on the left edge and subjected to a uniform vertical load on the right edge.",
+  "dimension": 2,
+  "coordinates": ["X", "Y"],
+  "time_dependent": false,
+  "unknowns": [
+    {
+      "name": "u",
+      "kind": "vector",
+      "shape": [2],
+      "components": ["u_x", "u_y"]
+    }
+  ],
+  "domain": {
+    "type": "quadrilateral",
+    "vertices": [
+      [0.0, 0.0],
+      [48.0, 44.0],
+      [48.0, 60.0],
+      [0.0, 44.0]
+    ],
+    "units": "mm",
+    "thickness": 1.0
+  },
+  "definitions": [
+    {"lhs": "F", "rhs": "I2 + grad(u)"},
+    {"lhs": "C", "rhs": "transpose(F) @ F"},
+    {"lhs": "J", "rhs": "det(F)"},
+    {"lhs": "psi_1", "rhs": "(mu/2)*(trace(C) - 3) + (lambda/4)*(J**2 - 1) - ((lambda/2) + mu)*log(J)"},
+    {"lhs": "S", "rhs": "(lambda/2)*(J**2 - 1)*inv(C) + mu*(I2 - inv(C))"},
+    {"lhs": "P", "rhs": "F @ S"}
+  ],
+  "strong_form": {
+    "equations": [
+      {"lhs": "Div(P)", "rhs": [0, 0]}
+    ],
+    "body_force": [0, 0]
+  },
+  "weak_form": {
+    "trial_space": "u in [H1(Omega)]^2",
+    "test_space": "v in [H1(Omega)]^2 with v = 0 on Gamma_D",
+    "lhs": "Integral_Omega(inner(P, grad(v)))",
+    "rhs": "Integral_Gamma_N(dot(tbar, v))"
+  },
+  "boundaries": {
+    "Gamma_D": {"type": "segment", "endpoints": [[0.0, 0.0], [0.0, 44.0]]},
+    "Gamma_N": {"type": "segment", "endpoints": [[48.0, 44.0], [48.0, 60.0]]},
+    "Gamma_rest": {"type": "remaining_boundary"}
+  },
+  "boundary_conditions": [
+    {"type": "Dirichlet", "target": "u", "boundary": "Gamma_D", "value": [0, 0]},
+    {"type": "Neumann", "target": "P*n", "boundary": "Gamma_N", "value": [0, "p0"], "description": "uniform vertical reference-boundary traction"},
+    {"type": "Neumann", "target": "P*n", "boundary": "Gamma_rest", "value": [0, 0], "description": "traction-free"}
+  ],
+  "initial_conditions": [],
+  "parameters": {
+    "lambda": {"value": 432.099, "units": "MPa"},
+    "mu": {"value": 185.185, "units": "MPa"},
+    "p0": {"value": 20.0, "units": "MPa"},
+    "t": {"value": 1.0, "units": "mm"}
+  },
+  "forcing_terms": {
+    "body_force": [0, 0],
+    "boundary_force": {"boundary": "Gamma_N", "value": [0, "p0"]}
+  },
+  "assumptions": [
+    "Plane strain 2D reduction of the paper's one-layer 3D setting with u_z = 0 on z = ±0.5 mm.",
+    "The loaded right edge is interpreted as carrying a uniform reference-boundary traction in the +Y direction.",
+    "Unit out-of-plane thickness equal to the stated physical thickness is used in the 2D model."
+  ],
+  "declared_ambiguities": [
+    "The exact traction measure associated with p0 = 20 MPa is not stated explicitly.",
+    "The exact published weak form is not given explicitly.",
+    "For a purely 2D reproduction, the precise thickness/load scaling convention must be assumed."
+  ],
+  "objective_outputs": [
+    "u_y at A = (48, 60) mm",
+    "deformed configuration",
+    "reaction on the clamped edge"
+  ],
+  "consistency_warnings": [
+    "Benchmark comparison should use the selected 2D plane-strain psi_1 dataset only.",
+    "Quantitative comparison with paper convergence histories is limited by method and mesh differences."
+  ],
+  "notes": "Faithful reconstruction from the approved scientist formulation with explicit load-measure and 2D-reduction assumptions."
+}

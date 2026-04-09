@@ -1,0 +1,30 @@
+{
+  "status": "infeasible_under_strict_preservation",
+  "ir_valid": true,
+  "operator_coverage_ok": true,
+  "strict_preservation": true,
+  "exact_candidate_found": false,
+  "strong_form_residual_zero": false,
+  "boundary_conditions_satisfied": false,
+  "weak_form_structurally_consistent": true,
+  "declared_ambiguities": [
+    "The exact traction measure associated with p0 = 20 MPa is not stated explicitly.",
+    "The exact published weak form is not given explicitly.",
+    "For a purely 2D reproduction, the precise thickness/load scaling convention must be assumed."
+  ],
+  "diagnostics": [
+    "Operator coverage check: True.",
+    "Strong form declares Div(P)=0: True.",
+    "Weak-form LHS structure valid: True.",
+    "Weak-form RHS structure valid: True.",
+    "Boundary partition references complete: True.",
+    "Baseline attempt with trivial displacement u=0 executed to check strict constraints without altering physics.",
+    "Strong residual exact zero: True.",
+    "Boundary constraints exact: False.",
+    "Initial conditions exact: True.",
+    "Auxiliary definitions consistent: True.",
+    "Skipped deep symbolic coefficient solve for nonlinear hyperelastic inverse/determinant system under v1 complexity guard.",
+    "Deterministic ansatz spaces were generated but exact strict solve was not closed symbolically within v1 complexity budget."
+  ],
+  "candidate_solution": null
+}
