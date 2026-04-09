@@ -1,0 +1,23 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "external_mms"
+version = "0.1.0"
+description = "Symbolic manufactured-solution verifier under strict preservation"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+  "sympy>=1.12",
+  "pydantic>=2.6",
+]
+
+[project.optional-dependencies]
+dev = [
+  "pytest>=8.0",
+]
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+testpaths = ["tests"]
