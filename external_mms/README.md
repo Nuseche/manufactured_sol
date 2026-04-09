@@ -62,20 +62,36 @@ python -m pip install -e .[dev]
 ## Ejecutar CLI
 
 La ejecución requiere agente LLM vía Azure OpenAI como parte del flujo principal.
+El CLI busca `.env` automáticamente hacia arriba desde el directorio actual, así que puede vivir en la raíz del repo.
 
 ```bash
+# opción 1: variables exportadas
 export AZURE_OPENAI_API_KEY="..."
 export AZURE_OPENAI_ENDPOINT="https://<tu-recurso>.openai.azure.com"
 export AZURE_OPENAI_DEPLOYMENT="<deployment-name>"
 # opcionales:
-# export AZURE_OPENAI_API_VERSION="2024-10-21"
+# export AZURE_OPENAI_MODEL="<deployment-name>"
+# export AZURE_OPENAI_API_VERSION="2025-04-01-preview"
 # export AZURE_OPENAI_TIMEOUT_SECONDS="20"
+
+# opción 2: archivo .env en la raíz del repo
+# AZURE_OPENAI_API_KEY="..."
+# AZURE_OPENAI_ENDPOINT="https://<tu-recurso>.openai.azure.com"
+# AZURE_OPENAI_DEPLOYMENT="<deployment-name>"
+# AZURE_OPENAI_MODEL="<deployment-name>"
+# AZURE_OPENAI_API_VERSION="2025-04-01-preview"
 
 python -m mms_agent.cli \
   --input examples/approved_scientist.json \
   --mode strict_preservation \
   --output examples/report.json
 ```
+
+Notas:
+
+- Si `AZURE_OPENAI_MODEL` está presente, el cliente usa Azure Responses API.
+- Si solo está `AZURE_OPENAI_DEPLOYMENT`, usa Azure Chat Completions.
+- Para configuraciones tipo GPT-5 en Azure, `AZURE_OPENAI_MODEL` + `AZURE_OPENAI_API_VERSION=2025-04-01-preview` es la ruta recomendada en este proyecto.
 
 Si faltan variables o falla la llamada a Azure OpenAI, el reporte final se devuelve con `status=parse_error` y diagnóstico explícito.
 

@@ -5,6 +5,7 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
+import mms_agent.llm_agent as llm_agent
 from mms_agent.cli import run
 
 
@@ -17,6 +18,9 @@ def test_cook_strict_smoke(tmp_path: Path, monkeypatch) -> None:
     monkeypatch.setenv("AZURE_OPENAI_API_KEY", "k")
     monkeypatch.setenv("AZURE_OPENAI_ENDPOINT", "https://example.openai.azure.com")
     monkeypatch.setenv("AZURE_OPENAI_DEPLOYMENT", "gpt4o")
+    monkeypatch.delenv("AZURE_OPENAI_MODEL", raising=False)
+    monkeypatch.delenv("AZURE_OPENAI_API_VERSION", raising=False)
+    monkeypatch.setattr(llm_agent, "_find_dotenv", lambda: None)
 
     def fake_requester(_settings, _payload):
         return {"choices": [{"message": {"content": "smoke ok"}}]}
@@ -44,6 +48,9 @@ def test_cook_strict_smoke_missing_azure_env_is_parse_error(tmp_path: Path, monk
     monkeypatch.delenv("AZURE_OPENAI_API_KEY", raising=False)
     monkeypatch.delenv("AZURE_OPENAI_ENDPOINT", raising=False)
     monkeypatch.delenv("AZURE_OPENAI_DEPLOYMENT", raising=False)
+    monkeypatch.delenv("AZURE_OPENAI_MODEL", raising=False)
+    monkeypatch.delenv("AZURE_OPENAI_API_VERSION", raising=False)
+    monkeypatch.setattr(llm_agent, "_find_dotenv", lambda: None)
 
     report = run(str(inp), "strict_preservation", str(out))
     assert report.status == "parse_error"
