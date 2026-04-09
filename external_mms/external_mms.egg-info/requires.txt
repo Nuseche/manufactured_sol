@@ -1,0 +1,5 @@
+sympy>=1.12
+pydantic>=2.6
+
+[dev]
+pytest>=8.0

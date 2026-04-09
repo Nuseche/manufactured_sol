@@ -20,8 +20,8 @@ def test_cook_geometry_normals_and_mapping() -> None:
     )
 
     n_right = geom.gamma_n.normal_outward_ccw()
-    assert n_right[0] == 1
-    assert n_right[1] == 0
+    assert float(n_right[0]) == 1.0
+    assert float(n_right[1]) == 0.0
     assert len(geom.gamma_rest) == 2
 
     p = geom.bilinear_map(Rational(0), Rational(0))

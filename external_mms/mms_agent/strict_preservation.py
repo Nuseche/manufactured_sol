@@ -5,7 +5,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Dict, List
 
-from sympy import Eq, Matrix, Symbol, simplify, symbols
+from sympy import Eq, Matrix, Symbol, symbols
 
 from .ansatz_generator import AnsatzCandidate
 from .geometry import CookGeometry
@@ -29,11 +29,11 @@ class StrictPreservationBuilder:
         grad_u = grad_vector(u, coords)
         f = Matrix.eye(2) + grad_u
         c = f.T * f
-        j = simplify(f.det())
+        j = f.det()
         lam = param_syms["lambda"]
         mu = param_syms["mu"]
-        s = simplify((lam / 2) * (j**2 - 1) * c.inv() + mu * (Matrix.eye(2) - c.inv()))
-        p = simplify(f * s)
+        s = (lam / 2) * (j**2 - 1) * c.inv() + mu * (Matrix.eye(2) - c.inv())
+        p = f * s
         return {"F": f, "C": c, "J": j, "S": s, "P": p}
 
     @staticmethod
@@ -50,28 +50,28 @@ class StrictPreservationBuilder:
         p = tensors["P"]
 
         residual = div_tensor(p, coords)
-        equations = [Eq(simplify(residual[0]), 0), Eq(simplify(residual[1]), 0)]
+        equations = [Eq(residual[0], 0), Eq(residual[1], 0)]
         diagnostics.append("Added exact strong-form residual constraints Div(P)=0.")
 
         x, y = coords[0], coords[1]
-        equations.append(Eq(simplify(ansatz.u[0].subs(x, 0)), 0))
-        equations.append(Eq(simplify(ansatz.u[1].subs(x, 0)), 0))
+        equations.append(Eq(ansatz.u[0].subs(x, 0), 0))
+        equations.append(Eq(ansatz.u[1].subs(x, 0), 0))
         diagnostics.append("Added exact Dirichlet constraints on Gamma_D.")
 
         s = symbols("s", real=True)
         x_n, y_n = geom.gamma_n.param(s)
         n_n = geom.gamma_n.normal_outward_ccw()
-        t_n = simplify(traction(p.subs({x: x_n, y: y_n}), n_n))
-        equations.append(Eq(simplify(t_n[0]), 0))
-        equations.append(Eq(simplify(t_n[1]), param_syms["p0"]))
+        t_n = traction(p.subs({x: x_n, y: y_n}), n_n)
+        equations.append(Eq(t_n[0], 0))
+        equations.append(Eq(t_n[1], param_syms["p0"]))
         diagnostics.append("Added exact Neumann constraints on Gamma_N.")
 
         for seg in geom.gamma_rest:
             x_r, y_r = seg.param(s)
             n_r = seg.normal_outward_ccw()
-            t_r = simplify(traction(p.subs({x: x_r, y: y_r}), n_r))
-            equations.append(Eq(simplify(t_r[0]), 0))
-            equations.append(Eq(simplify(t_r[1]), 0))
+            t_r = traction(p.subs({x: x_r, y: y_r}), n_r)
+            equations.append(Eq(t_r[0], 0))
+            equations.append(Eq(t_r[1], 0))
         diagnostics.append("Added exact traction-free constraints on Gamma_rest.")
 
         if ir.initial_conditions:

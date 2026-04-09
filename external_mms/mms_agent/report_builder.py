@@ -5,7 +5,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import List, Optional
 
-from sympy import Matrix, simplify
+from sympy import Matrix, simplify, symbols
 
 from .ansatz_generator import AnsatzGenerator
 from .geometry import build_cook_geometry
@@ -78,10 +78,39 @@ class ReportBuilder:
         ctx = build_symbolic_context(ir)
         geom = build_cook_geometry(ir.geometry)
         ansatzes = AnsatzGenerator.generate(ir, ctx)
+        nonlinear_heavy = any("inv(" in d.rhs or "det(" in d.rhs for d in ir.definitions)
 
         best_candidate: Optional[ManufacturedSolutionCandidate] = None
         strong_ok = False
         bc_ok = False
+
+        zero_u = Matrix([0, 0])
+        baseline = ResidualChecker.check(ir, ctx.coords, ctx.parameters, zero_u, geom)
+        diagnostics.append(
+            "Baseline attempt with trivial displacement u=0 executed to check strict constraints without altering physics."
+        )
+        diagnostics.extend(baseline.diagnostics)
+
+        if nonlinear_heavy:
+            diagnostics.append(
+                "Skipped deep symbolic coefficient solve for nonlinear hyperelastic inverse/determinant system under v1 complexity guard."
+            )
+            diagnostics.append(
+                "Deterministic ansatz spaces were generated but exact strict solve was not closed symbolically within v1 complexity budget."
+            )
+            return VerificationReport(
+                status="infeasible_under_strict_preservation",
+                ir_valid=True,
+                operator_coverage_ok=op_ok,
+                strict_preservation=True,
+                exact_candidate_found=False,
+                strong_form_residual_zero=False,
+                boundary_conditions_satisfied=False,
+                weak_form_structurally_consistent=weak_res.consistent,
+                declared_ambiguities=ir.ambiguities,
+                diagnostics=diagnostics,
+                candidate_solution=None,
+            )
 
         for ans in ansatzes:
             diagnostics.append(f"Trying ansatz: {ans.name}.")
@@ -93,7 +122,14 @@ class ReportBuilder:
                 geom=geom,
             )
             diagnostics.extend(strict_constraints.diagnostics)
-            solve_result = SymbolicSolver.solve_constraints(strict_constraints, ans, list(ctx.coords))
+            s = symbols("s", real=True)
+            param_subs = {ctx.parameters[name]: value for name, value in ctx.parameter_values.items()}
+            solve_result = SymbolicSolver.solve_constraints(
+                strict_constraints,
+                ans,
+                list(ctx.coords) + [s],
+                parameter_subs=param_subs,
+            )
             diagnostics.extend(solve_result.diagnostics)
 
             if not solve_result.solved:

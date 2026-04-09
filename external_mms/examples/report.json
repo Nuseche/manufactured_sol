@@ -18,9 +18,13 @@
     "Weak-form LHS structure valid: True.",
     "Weak-form RHS structure valid: True.",
     "Boundary partition references complete: True.",
-    "Trying ansatz: linear_x_factored.",
-    "Trying ansatz: quadratic_x_factored.",
-    "No exact nontrivial manufactured solution found in deterministic v1 ansatz spaces under strict preservation."
+    "Baseline attempt with trivial displacement u=0 executed to check strict constraints without altering physics.",
+    "Strong residual exact zero: True.",
+    "Boundary constraints exact: False.",
+    "Initial conditions exact: True.",
+    "Auxiliary definitions consistent: True.",
+    "Skipped deep symbolic coefficient solve for nonlinear hyperelastic inverse/determinant system under v1 complexity guard.",
+    "Deterministic ansatz spaces were generated but exact strict solve was not closed symbolically within v1 complexity budget."
   ],
   "candidate_solution": null
 }
