@@ -69,6 +69,27 @@ python -m mms_agent.cli \
   --output examples/report.json
 ```
 
+### Diagnóstico LLM opcional (Azure OpenAI)
+
+Si quieres anexar una nota diagnóstica adicional (post-check) con un agente LLM:
+
+```bash
+export AZURE_OPENAI_API_KEY="..."
+export AZURE_OPENAI_ENDPOINT="https://<tu-recurso>.openai.azure.com"
+export AZURE_OPENAI_DEPLOYMENT="<deployment-name>"
+# opcionales:
+# export AZURE_OPENAI_API_VERSION="2024-10-21"
+# export AZURE_OPENAI_TIMEOUT_SECONDS="20"
+
+python -m mms_agent.cli \
+  --input examples/approved_scientist.json \
+  --mode strict_preservation \
+  --output examples/report.json \
+  --enable-llm-diagnostics
+```
+
+Si faltan variables, el sistema no falla: deja trazado en `diagnostics` que el paso LLM fue omitido.
+
 ## Ejecutar tests
 
 ```bash
